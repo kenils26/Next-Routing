@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 
 export function proxy(req) {
   try {
+    console.log("middleware is running...")
     const token = req.cookies.get("token")?.value;
 
     if (!token) {
@@ -20,5 +21,5 @@ export function proxy(req) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/products/:path*"],
 };

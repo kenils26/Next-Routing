@@ -1,38 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import registerAction from "@/app/actions/registerAction";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [state, formAction, isPending] = useActionState(registerAction, {});
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMessage(data.message);
-    } else {
-      setMessage("Registered successfully!");
-      setTimeout(() => {
-        router.push("/login");
-      }, 1000);
+  
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/login");
     }
-  };
+  }, [state, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -40,11 +22,11 @@ export default function RegisterPage() {
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
         
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Create Account 🚀
+          Create Account 
         </h2>
 
-        <form onSubmit={handleRegister} className="space-y-5">
-
+        <form action={formAction} className="space-y-5">
+              
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -52,9 +34,8 @@ export default function RegisterPage() {
             </label>
             <input
               type="text"
+              name="name"
               placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition"
               required
             />
@@ -67,9 +48,8 @@ export default function RegisterPage() {
             </label>
             <input
               type="email"
+              name="email"
               placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition"
               required
             />
@@ -82,9 +62,8 @@ export default function RegisterPage() {
             </label>
             <input
               type="password"
+              name="password"
               placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition"
               required
             />
@@ -92,36 +71,31 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-200 font-semibold"
+            disabled={isPending}
+            className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-800 transition duration-200 font-semibold disabled:opacity-50"
           >
-            Register
+            {isPending ? "Registering..." : "Register"}
           </button>
         </form>
 
-        {message && (
-          <p
-            className={`mt-4 text-center text-sm ${
-              message === "Registered successfully!"
-                ? "text-green-600"
-                : "text-red-500"
-            }`}
-          >
-            {message}
+        {/* Error message */}
+        {state?.error && (
+          <p className="mt-4 text-center text-red-500 text-sm">
+            {state.error}
           </p>
         )}
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <span
-            onClick={() => router.push("/login")}
-            className="text-green-600 font-medium cursor-pointer hover:underline"
+          <Link
+            href="/login"
+            className="text-gray-600 font-medium hover:underline"
           >
             Login
-          </span>
+          </Link>
         </p>
 
       </div>
-
     </div>
   );
 }

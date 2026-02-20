@@ -1,35 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { loginAction } from "@/app/actions/loginAction";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [state, formAction, isPending] = useActionState(loginAction, {});
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMessage(data.message);
-    } else {
+  useEffect(() => {
+    if (state?.success) {
       router.push("/dashboard");
     }
-  };
+  }, [state, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -37,10 +20,10 @@ export default function LoginPage() {
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
         
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome Back 👋
+          Welcome Back
         </h2>
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form action={formAction} className="space-y-5">
           
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -48,9 +31,8 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
+              name="email"
               placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
               required
             />
@@ -62,9 +44,8 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
+              name="password"
               placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
               required
             />
@@ -72,19 +53,19 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold"
+            disabled={isPending}
+            className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-800 transition duration-200 font-semibold disabled:opacity-50"
           >
-            Login
+            {isPending ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {message && (
+        {state?.error && (
           <p className="mt-4 text-center text-red-500 text-sm">
-            {message}
+            {state.error}
           </p>
         )}
       </div>
-
     </div>
   );
 }

@@ -1,18 +1,19 @@
 "use client";
 
+import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { logoutAction } from "@/app/actions/logoutAction";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [state, formAction, isPending] = useActionState(logoutAction, {});
 
-  const handleLogout = async () => {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    router.push("/login");
-  };
+  // Redirect after logout
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/login");
+    }
+  }, [state, router]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -23,12 +24,15 @@ export default function DashboardPage() {
           My Dashboard
         </h1>
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200 font-medium"
-        >
-          Logout
-        </button>
+        <form action={formAction}>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200 font-medium disabled:opacity-50"
+          >
+            {isPending ? "Logging out..." : "Logout"}
+          </button>
+        </form>
       </div>
 
       {/* Main Content */}
