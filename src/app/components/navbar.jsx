@@ -16,6 +16,10 @@ export default function Navbar() {
         <Link href="/products" className="text-white hover:text-gray-300">
           Products
         </Link>
+
+        <Link href="/recipes" className="text-white hover:text-gray-300">
+          Recipes
+        </Link>
         
         <Link href="/login" className="text-white hover:text-gray-300">
           Login
@@ -24,6 +28,8 @@ export default function Navbar() {
         <Link href="/register" className="text-white hover:text-gray-300">
           Register
         </Link>
+
+
       </div>
 
     </div>

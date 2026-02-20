@@ -8,8 +8,19 @@ async function getProduct(id) {
   return res.json();
 }
 
-
-
+export async function generateMetadata({params}){
+    const {id} = await params;
+    const product = await getProduct(id);
+    return{
+        title: product.title,
+        description: product.description,
+        openGraph:{
+            title: product.title,
+            description: product.description,
+            images: [product.thumbnail],
+        }
+    }
+}
 export default async function ProductDetails({ params }) {
   const { id } = await params;
   const product = await getProduct(id);
