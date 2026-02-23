@@ -4,7 +4,7 @@ let redis;
 
 if (!global._redisClient) {
   redis = createClient({
-    url: "redis://default:mypassword@localhost:6379",
+    url: process.env.REDIS_URL,
   });
 
   redis.on("error", (err) => console.error("Redis Error:", err));

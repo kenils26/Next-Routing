@@ -1,11 +1,22 @@
 import Image from "next/image";
+import getRedis from "@/app/lib/redis";
 
 async function getProduct(id) {
-  const res = await fetch(`https://dummyjson.com/products/${id}`, {
-    next: { revalidate: 60 },
-  });
+  const redis = await getRedis();
+  const cacheKey = `product:${id}`;
 
-  return res.json();
+  const cached = await redis.get(cacheKey);
+
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  const product = await res.json();
+
+  await redis.set(cacheKey, JSON.stringify(product));
+  await redis.expire(cacheKey, 60);
+  return product;
 }
 
 export async function generateMetadata({params}){

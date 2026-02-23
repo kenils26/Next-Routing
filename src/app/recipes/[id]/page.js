@@ -1,13 +1,23 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import getRedis from "@/app/lib/redis";
 
 async function getRecipe(id) {
-  const res = await fetch(
-    `https://dummyjson.com/recipes/${id}`,
-    { next: { revalidate: 60 } }
-  );
+  const redis = await getRedis();
+  const cacheKey = `recipe:${id}`;
+  
+  const cached = await redis.get(cacheKey);
+
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
+  const res = await fetch(`https://dummyjson.com/recipes/${id}`);
 
   const data = await res.json();
+
+  await redis.set(cacheKey, JSON.stringify(data));
+  await redis.expire(cacheKey, 60);
 
   if (!data.id) {
     return null;
