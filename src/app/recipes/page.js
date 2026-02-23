@@ -1,11 +1,22 @@
 import Link from "next/link";
 import Image from "next/image";
+import getRedis from "../lib/redis";
 
 async function getRecipes() {
-  const res = await fetch("https://dummyjson.com/recipes?limit=30", {
-    next: { revalidate: 60 },
-  });
-  return res.json();
+  const redis = await getRedis();
+  const cacheKey = "recipes:all";
+  const cached = await redis.get(cacheKey);
+
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
+  const res = await fetch("https://dummyjson.com/recipes?limit=30");
+  const recipes = await res.json();
+
+  await redis.set(cacheKey, JSON.stringify(recipes));
+  await redis.expire(cacheKey, 60);
+  return recipes;
 }
 
 export const metadata = {

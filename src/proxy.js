@@ -21,5 +21,5 @@ export function proxy(req) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/products/:path*"],
+  matcher: ["/dashboard/:path*", "/products/:path*", "/recipes/:path*"],
 };
